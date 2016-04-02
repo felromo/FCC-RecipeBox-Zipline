@@ -12,4 +12,4 @@ Recipe Box is a web application designed to allow the user to add recipes and di
 Some Instructions
 
 ## Credits
-[list of people/tutorials to thank for making this application possible]
+Sortable list taken from this tutorial [here](http://webcloud.se/sortable-list-component-react-js/)
