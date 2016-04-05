@@ -4,7 +4,7 @@ require('bootstrap-webpack');
 require('./styles.scss');
 require('font-awesome-webpack');
 
-var colors = ['Edit me! Delete Me! Add More!'];
+var colors = ['Click me for more Info!'];
 var placeholder = document.createElement('li');
 placeholder.className = 'placeholder';
 /* localStorage.setItem('stored-recipes', JSON.stringify(names)); */
@@ -82,7 +82,11 @@ class List extends React.Component{
   }
   dragEnd = () => {
     this.dragged.style.display = 'block';
-    this.dragged.parentNode.removeChild(placeholder);
+    /* console.log('--->' + this.dragged.parentNode); */
+    /* console.log('--->' + this.dragged.parentNode.parentNode.children); */
+    /* console.log('--->' + $('.placeholder')); */
+    /* this.dragged.parentNode.removeChild(placeholder); */
+    $('.placeholder').remove();
 
     var data = this.state.data;
     var from = Number(this.dragged.dataset.id);
@@ -116,24 +120,39 @@ class List extends React.Component{
   onClickHandler = (e) => {
     // handle the clicks
     console.log('reveal information')
-    console.log($(e.target).text());
+    /* console.log($(e.target).text()); */
+    $('.content-section').removeClass('content-section-open');
+    /* $('li').removeClass('li-no-border'); */
+    console.log($(e.target).siblings());
+    if($($(e.target).siblings()[0]).is('div')) {
+      /* $($(e.target).addClass('li-no-border')); */
+        $($(e.target).siblings()[0]).addClass('content-section-open');
+    }
+        else
+      /* $($(e.target).siblings()[0]).addClass('content-section-open'); */
+      $($($(e.target).parent()).siblings()[0]).addClass('content-section-open');
   }
   render() {
     return (
       <ul onDragOver={this.dragOver}>
         {this.state.data.map(function(item, i) {
-           return <li
-                    data-id={i}
-                    key={i}
-                    draggable="true"
-                    onDragEnd={this.dragEnd}
-                    onDragStart={this.dragStart}
-                    onClick={this.onClickHandler}
-                    className="accordion-section"
-                  >
-        {item}<span className="edit-buttons pull-right" id={i}><button type="button" id={i} className="btn btn-success edit-list-item"><i className="fa fa-pencil"></i></button><button type="button" id={i} className="btn btn-danger pull-right delete-list-item" onClick={this.removeItemHandler}><i className="fa fa-trash"></i></button></span>
-                  </li>;
-         }, this)}
+           return (
+                  <div key={i}>
+                    <li
+                      data-id={i}
+                      key={i}
+                      draggable="true"
+                      onDragEnd={this.dragEnd}
+                      onDragStart={this.dragStart}
+                      onClick={this.onClickHandler}
+                      className="accordion-section"
+                    >
+                      {item}<span className="edit-buttons pull-right" id={i}><button type="button" id={i} className="btn btn-success edit-list-item"><i className="fa fa-pencil"></i></button><button type="button" id={i} className="btn btn-danger pull-right delete-list-item" onClick={this.removeItemHandler}><i className="fa fa-trash"></i></button></span>
+                    </li>
+                    <div className="content-section">This is some content</div>
+                  </div>);
+         }, this)
+        }
       </ul>
     );
   }
