@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDom from 'react-dom';
 import $ from 'jquery';
 require('bootstrap-webpack');
 require('./styles.scss');
@@ -18,7 +19,8 @@ class App extends React.Component {
       if (localStorage.getItem('temporary2')) {
         // set the state here
         this.state = {
-          colors: JSON.parse(localStorage.getItem('temporary2'))
+          colors: JSON.parse(localStorage.getItem('temporary2')),
+          view: {showModal: false} 
         };
         console.log('this is what was in memory');
         console.log(localStorage.getItem('temporary2'));
@@ -26,7 +28,8 @@ class App extends React.Component {
         // there isnt anything stored there yet and we need to use a default value
         console.log('there was nothing in memory');
         this.state = {
-          colors: colors
+          colors: colors,
+          view: {showModal: false} 
         };
       }
     } else {
@@ -35,6 +38,22 @@ class App extends React.Component {
     /* this.state = {
        colors: colors
        }; */
+    // no matter what we still need to set a state for the modal
+    /* this.state = { view: {showModal: false} }; */
+  }
+  handleHideModal = () => {
+    this.setState({
+      view: {
+        showModal: false
+      }
+    });
+  }
+  handleShowModal = () => {
+    this.setState({
+      view: {
+        showModal: true
+      }
+    });
   }
   addItemToList = () => {
     console.log(colors);
@@ -59,9 +78,12 @@ class App extends React.Component {
     return (
       <div className="list-container">
         <div className="list-title">Recipe Box</div>
-        <List data={this.state.colors} removeItem={this.removeItemFromList}/>
+        <List data={this.state.colors} removeItem={this.removeItemFromList} modalHandler={this.handleShowModal}/>
         <div className="list-footer" onClick={this.addItemToList}>
           <i className="add-button fa fa-plus-square"></i>
+        </div>
+        <div className="row">
+          {this.state.view.showModal ? <Modal handleHideModal={this.handleHideModal}/> : null}
         </div>
       </div>
     );
@@ -120,17 +142,18 @@ class List extends React.Component{
   onClickHandler = (e) => {
     // handle the clicks
     console.log('reveal information')
-    /* console.log($(e.target).text()); */
-    $('.content-section').removeClass('content-section-open');
-    /* $('li').removeClass('li-no-border'); */
+    /* $('.content-section').removeClass('content-section-open'); */
     console.log($(e.target).siblings());
     if($($(e.target).siblings()[0]).is('div')) {
-      /* $($(e.target).addClass('li-no-border')); */
-        $($(e.target).siblings()[0]).addClass('content-section-open');
+      $('.content-section').removeClass('content-section-open');
+      $($(e.target).siblings()[0]).addClass('content-section-open');
     }
-        else
-      /* $($(e.target).siblings()[0]).addClass('content-section-open'); */
+    else if ($($(e.target).siblings()[0]).is('span')){
+      $('.content-section').removeClass('content-section-open');
       $($($(e.target).parent()).siblings()[0]).addClass('content-section-open');
+    } else {
+      console.log('legit do nothing');
+    } 
   }
   render() {
     return (
@@ -147,13 +170,46 @@ class List extends React.Component{
                       onClick={this.onClickHandler}
                       className="accordion-section"
                     >
-                      {item}<span className="edit-buttons pull-right" id={i}><button type="button" id={i} className="btn btn-success edit-list-item"><i className="fa fa-pencil"></i></button><button type="button" id={i} className="btn btn-danger pull-right delete-list-item" onClick={this.removeItemHandler}><i className="fa fa-trash"></i></button></span>
+                      {item}<span className="edit-buttons pull-right" id={i}><button type="button" id={i} className="btn btn-success edit-list-item" onClick={this.props.modalHandler}><i className="fa fa-pencil"></i></button><button type="button" id={i} className="btn btn-danger pull-right delete-list-item" onClick={this.removeItemHandler}><i className="fa fa-trash"></i></button></span>
                     </li>
                     <div className="content-section">This is some content</div>
                   </div>);
          }, this)
         }
       </ul>
+    );
+  }
+}
+
+class Modal extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+  componentDidMount = () => {
+    /* $(this.getDOMNode()).modal('show'); */
+    $(ReactDom.findDOMNode(this)).modal('show');
+    $(ReactDom.findDOMNode(this)).on('hidden.bs.modal', this.props.handleHideModal);
+    /* $(this.getDOMNode()).on('hidden.bs.modal', this.props.handleHideModal); */
+  }
+  render() {
+    return (
+      <div className="modal fade" tabIndex="-1" role="dialog">
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 className="modal-title">Modal title</h4>
+            </div>
+            <div className="modal-body">
+              <p>One fine body&hellip;</p>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="button" className="btn btn-primary">Save changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 }
