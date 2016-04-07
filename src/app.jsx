@@ -1,11 +1,12 @@
 import React from 'react';
 import ReactDom from 'react-dom';
 import $ from 'jquery';
+import PubSub from 'pubsub-js';
 require('bootstrap-webpack');
 require('./styles.scss');
 require('font-awesome-webpack');
 
-var colors = ['Click me for more Info!'];
+var colors = ['Click me for more Info'];
 var placeholder = document.createElement('li');
 placeholder.className = 'placeholder';
 /* localStorage.setItem('stored-recipes', JSON.stringify(names)); */
@@ -35,11 +36,6 @@ class App extends React.Component {
     } else {
       // you cant use local storage not available
     }
-    /* this.state = {
-       colors: colors
-       }; */
-    // no matter what we still need to set a state for the modal
-    /* this.state = { view: {showModal: false} }; */
   }
   handleHideModal = () => {
     this.setState({
@@ -48,11 +44,14 @@ class App extends React.Component {
       }
     });
   }
-  handleShowModal = () => {
+  handleShowModal = (title, items, index) => {
     this.setState({
       view: {
         showModal: true
-      }
+      },
+      title: title,
+      items: items,
+      index: index
     });
   }
   addItemToList = () => {
@@ -74,6 +73,11 @@ class App extends React.Component {
     });
     localStorage.setItem('temporary2', JSON.stringify(tmp));
   }
+  saveForwarder = (items) => {
+    // in here set some state that will be passed down to list
+    console.log('we will be saving: ');
+    console.log(items);
+  }
   render() {
     return (
       <div className="list-container">
@@ -83,18 +87,28 @@ class App extends React.Component {
           <i className="add-button fa fa-plus-square"></i>
         </div>
         <div className="row">
-          {this.state.view.showModal ? <Modal handleHideModal={this.handleHideModal}/> : null}
+          {this.state.view.showModal ? <Modal handleHideModal={this.handleHideModal} title={this.state.title} items={this.state.items} index={this.state.index} saveForwarder={this.saveForwarder}/> : null}
         </div>
       </div>
     );
   }
 }
 
-
 class List extends React.Component{
   constructor(props) {
     super(props);
     this.state = {data: this.props.data};
+    var token = PubSub.subscribe('MyTopic', function (msg, data) {
+      // data will be some kind of object with the list and the index of the li
+      console.log('all the way from downtown');
+      console.log(data);
+      var tmp = this.state.data;
+      tmp[data.index] = data.title;
+      this.setState({
+        data: tmp
+      });
+      $('#content-' + data.index).text(data.items);
+    }.bind(this));
   }
   dragStart = (e) => {
     this.dragged = e.currentTarget;
@@ -141,7 +155,7 @@ class List extends React.Component{
   }
   onClickHandler = (e) => {
     // handle the clicks
-    console.log('reveal information')
+    console.log('reveal information');
     /* $('.content-section').removeClass('content-section-open'); */
     console.log($(e.target).siblings());
     if($($(e.target).siblings()[0]).is('div')) {
@@ -153,7 +167,15 @@ class List extends React.Component{
       $($($(e.target).parent()).siblings()[0]).addClass('content-section-open');
     } else {
       console.log('legit do nothing');
-    } 
+    }
+  }
+  onClickModalHandler = (e) => {
+
+    console.log($($(e.target).closest('li')).attr('id'));
+    var title = $(e.target).closest('li').text();
+    var listOfItems = $($(e.target).closest('li').siblings()[0]).text();
+    var index = $($(e.target).closest('li')).attr('id');
+    this.props.modalHandler(title, listOfItems, index);
   }
   render() {
     return (
@@ -163,6 +185,7 @@ class List extends React.Component{
                   <div key={i}>
                     <li
                       data-id={i}
+                      id={i}
                       key={i}
                       draggable="true"
                       onDragEnd={this.dragEnd}
@@ -170,9 +193,9 @@ class List extends React.Component{
                       onClick={this.onClickHandler}
                       className="accordion-section"
                     >
-                      {item}<span className="edit-buttons pull-right" id={i}><button type="button" id={i} className="btn btn-success edit-list-item" onClick={this.props.modalHandler}><i className="fa fa-pencil"></i></button><button type="button" id={i} className="btn btn-danger pull-right delete-list-item" onClick={this.removeItemHandler}><i className="fa fa-trash"></i></button></span>
+                      {item}<span className="edit-buttons pull-right" id={i}><button type="button" id={i} className="btn btn-success edit-list-item" onClick={this.onClickModalHandler}><i className="fa fa-pencil"></i></button><button type="button" id={i} className="btn btn-danger pull-right delete-list-item" onClick={this.removeItemHandler}><i className="fa fa-trash"></i></button></span>
                     </li>
-                    <div className="content-section">This is some content</div>
+                    <div className="content-section" id={'content-' + i}>This is some content</div>
                   </div>);
          }, this)
         }
@@ -184,12 +207,37 @@ class List extends React.Component{
 class Modal extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      title: this.props.title,
+      recipeItems: this.props.items
+    };
   }
   componentDidMount = () => {
-    /* $(this.getDOMNode()).modal('show'); */
     $(ReactDom.findDOMNode(this)).modal('show');
     $(ReactDom.findDOMNode(this)).on('hidden.bs.modal', this.props.handleHideModal);
-    /* $(this.getDOMNode()).on('hidden.bs.modal', this.props.handleHideModal); */
+  }
+  handleTitleChange = (e) => {
+    this.setState({
+      title: e.target.value
+    });
+  }
+  handleContentChange = (e) => {
+    this.setState({
+      recipeItems: e.target.value
+    });
+  }
+  saveHandler = () => {
+    // here is where we will pass the new edits up to be displayed on the list
+    var tmp = this.state.recipeItems;
+    var title = this.state.title;
+    var index = this.props.index;
+    /* this.props.saveForwarder(tmp); */
+    var data = {
+      title: title,
+      items: tmp,
+      index: index
+    };
+    PubSub.publish('MyTopic', data);
   }
   render() {
     return (
@@ -198,14 +246,15 @@ class Modal extends React.Component {
           <div className="modal-content">
             <div className="modal-header">
               <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              <h4 className="modal-title">Modal title</h4>
+              {/* <h4 className="modal-title">{this.state.title}</h4> */}
+              <h4 className="modal-title"><input value={this.state.title} onChange={this.handleTitleChange}/></h4>
             </div>
             <div className="modal-body">
-              <p>One fine body&hellip;</p>
+              <input value={this.state.recipeItems} onChange={this.handleContentChange}/>
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
-              <button type="button" className="btn btn-primary">Save changes</button>
+              <button type="button" className="btn btn-primary" onClick={this.saveHandler}>Save changes</button>
             </div>
           </div>
         </div>
