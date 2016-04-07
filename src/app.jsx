@@ -6,7 +6,8 @@ require('bootstrap-webpack');
 require('./styles.scss');
 require('font-awesome-webpack');
 
-var colors = ['Click me for more Info'];
+/* var colors = ['Click me for more Info']; */
+var colors = [{title: 'Click me for more Info', content: 'some instructions'}];
 var placeholder = document.createElement('li');
 placeholder.className = 'placeholder';
 /* localStorage.setItem('stored-recipes', JSON.stringify(names)); */
@@ -57,7 +58,8 @@ class App extends React.Component {
   addItemToList = () => {
     console.log(colors);
     var tmp = this.state.colors;
-    tmp.push('New Item');
+    /* tmp.push('New Item'); */
+    tmp.push({title: 'New item', content: 'item1,item2,item3'});
     this.setState({
       colors: tmp
     });
@@ -98,16 +100,17 @@ class List extends React.Component{
   constructor(props) {
     super(props);
     this.state = {data: this.props.data};
-    var token = PubSub.subscribe('MyTopic', function (msg, data) {
+    PubSub.subscribe('MyTopic', function (msg, data) {
       // data will be some kind of object with the list and the index of the li
       console.log('all the way from downtown');
       console.log(data);
       var tmp = this.state.data;
-      tmp[data.index] = data.title;
+      tmp[data.index].title = data.title;
+      tmp[data.index].content = data.items;
       this.setState({
         data: tmp
       });
-      $('#content-' + data.index).text(data.items);
+      /* $('#content-' + data.index).text(data.items); */
     }.bind(this));
   }
   dragStart = (e) => {
@@ -193,9 +196,9 @@ class List extends React.Component{
                       onClick={this.onClickHandler}
                       className="accordion-section"
                     >
-                      {item}<span className="edit-buttons pull-right" id={i}><button type="button" id={i} className="btn btn-success edit-list-item" onClick={this.onClickModalHandler}><i className="fa fa-pencil"></i></button><button type="button" id={i} className="btn btn-danger pull-right delete-list-item" onClick={this.removeItemHandler}><i className="fa fa-trash"></i></button></span>
+                      {item.title}<span className="edit-buttons pull-right" id={i}><button type="button" id={i} className="btn btn-success edit-list-item" onClick={this.onClickModalHandler}><i className="fa fa-pencil"></i></button><button type="button" id={i} className="btn btn-danger pull-right delete-list-item" onClick={this.removeItemHandler}><i className="fa fa-trash"></i></button></span>
                     </li>
-                    <div className="content-section" id={'content-' + i}>This is some content</div>
+                    <div className="content-section" id={'content-' + i}>{item.content}</div>
                   </div>);
          }, this)
         }
