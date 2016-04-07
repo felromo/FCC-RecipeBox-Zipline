@@ -37,6 +37,9 @@ class App extends React.Component {
     } else {
       // you cant use local storage not available
     }
+    PubSub.subscribe('SaveChanges', function (msg, data) {
+      localStorage.setItem('temporary2', JSON.stringify(data));
+    });
   }
   handleHideModal = () => {
     this.setState({
@@ -110,6 +113,7 @@ class List extends React.Component{
       this.setState({
         data: tmp
       });
+      PubSub.publish('SaveChanges', this.state.data);
       /* $('#content-' + data.index).text(data.items); */
     }.bind(this));
   }
