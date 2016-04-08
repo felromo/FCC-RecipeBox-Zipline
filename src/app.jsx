@@ -7,7 +7,7 @@ require('./styles.scss');
 require('font-awesome-webpack');
 
 /* var colors = ['Click me for more Info']; */
-var colors = [{title: 'Click me for more Info', content: 'some instructions'}];
+var colors = [{title: 'Click me for more Info', content: 'add new items with button at the bottom, edit with green right button, delete with red right button, drag up and down list items for priority preference'}];
 var placeholder = document.createElement('li');
 placeholder.className = 'placeholder';
 /* localStorage.setItem('stored-recipes', JSON.stringify(names)); */
