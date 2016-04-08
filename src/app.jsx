@@ -179,11 +179,13 @@ class List extends React.Component{
   }
   onClickModalHandler = (e) => {
 
+    // everything is handled in the state now we may not need to use jquery here
     console.log($($(e.target).closest('li')).attr('id'));
     var title = $(e.target).closest('li').text();
     var listOfItems = $($(e.target).closest('li').siblings()[0]).text();
     var index = $($(e.target).closest('li')).attr('id');
-    this.props.modalHandler(title, listOfItems, index);
+    /* this.props.modalHandler(title, listOfItems, index); */
+    this.props.modalHandler(this.state.data[index].title, this.state.data[index].content, index);
   }
   render() {
     return (
