@@ -162,6 +162,7 @@ class List extends React.Component{
   }
   onClickHandler = (e) => {
     // handle the clicks
+    // this should definitely be rewritten...
     console.log('reveal information');
     /* $('.content-section').removeClass('content-section-open'); */
     console.log($(e.target).siblings());
@@ -186,8 +187,10 @@ class List extends React.Component{
   }
   render() {
     return (
-      <ul onDragOver={this.dragOver}>
+      <ul onDragOver={this.dragOver} className="outer-list">
         {this.state.data.map(function(item, i) {
+          var prettyList = item.content.split(',');
+           console.log(prettyList);
            return (
                   <div key={i}>
                     <li
@@ -202,7 +205,9 @@ class List extends React.Component{
                     >
                       {item.title}<span className="edit-buttons pull-right" id={i}><button type="button" id={i} className="btn btn-success edit-list-item" onClick={this.onClickModalHandler}><i className="fa fa-pencil"></i></button><button type="button" id={i} className="btn btn-danger pull-right delete-list-item" onClick={this.removeItemHandler}><i className="fa fa-trash"></i></button></span>
                     </li>
-                    <div className="content-section" id={'content-' + i}>{item.content}</div>
+                    <div className="content-section" id={'content-' + i}><ul>{prettyList.map(function (value, ii) {
+                        return <li className="content-li" key={ii}>{value}</li>;
+                      })}</ul></div>
                   </div>);
          }, this)
         }
@@ -244,6 +249,8 @@ class Modal extends React.Component {
       items: tmp,
       index: index
     };
+    console.log('before sending the data off heres what it looks like');
+    console.log(data);
     PubSub.publish('MyTopic', data);
   }
   render() {
@@ -254,10 +261,10 @@ class Modal extends React.Component {
             <div className="modal-header">
               <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
               {/* <h4 className="modal-title">{this.state.title}</h4> */}
-              <h4 className="modal-title"><input value={this.state.title} onChange={this.handleTitleChange}/></h4>
+              <h4 className="modal-title">Recipe Name: <input value={this.state.title} onChange={this.handleTitleChange}/></h4>
             </div>
             <div className="modal-body">
-              <input value={this.state.recipeItems} onChange={this.handleContentChange}/>
+              Comma Separated List: <input value={this.state.recipeItems} onChange={this.handleContentChange}/>
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
