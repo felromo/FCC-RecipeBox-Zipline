@@ -103,7 +103,7 @@ class List extends React.Component{
   constructor(props) {
     super(props);
     this.state = {data: this.props.data};
-    PubSub.subscribe('MyTopic', function (msg, data) {
+    PubSub.subscribe('Updated', function (msg, data) {
       // data will be some kind of object with the list and the index of the li
       console.log('all the way from downtown');
       console.log(data);
@@ -253,7 +253,7 @@ class Modal extends React.Component {
     };
     console.log('before sending the data off heres what it looks like');
     console.log(data);
-    PubSub.publish('MyTopic', data);
+    PubSub.publish('Updated', data);
   }
   render() {
     return (
