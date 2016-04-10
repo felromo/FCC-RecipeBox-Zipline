@@ -1,7 +1,7 @@
 {
-  "name": "personal-portfolio",
+  "name": "RecipeBox",
   "version": "1.0.0",
-  "description": "My personal portfolio",
+  "description": "RecipeBox Zipline for FCC",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node ./server.js",
