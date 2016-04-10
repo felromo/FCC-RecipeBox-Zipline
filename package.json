@@ -1,5 +1,5 @@
 {
-  "name": "RecipeBox",
+  "name": "recipe-box",
   "version": "1.0.0",
   "description": "RecipeBox Zipline for FCC",
   "scripts": {
